@@ -260,6 +260,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 			return;
 		
 		String code = txtItemCode.getText().trim();
+		code = code.substring(1, code.length()-1);
 		
 		for (int i = 0; i < data.size(); i++) {
 			for (int j = 0; j < data.get(i).items.size(); j++) {
