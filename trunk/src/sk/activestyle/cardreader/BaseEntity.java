@@ -7,6 +7,7 @@ public abstract class BaseEntity {
 	public String Id;
 	public String StoreNr;
 	private BaseState State;
+	public String CustName;
 		
 	public BaseState getState() {
 		return State;
