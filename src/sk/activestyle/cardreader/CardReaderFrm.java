@@ -13,8 +13,9 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -54,6 +55,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 	String eol = System.getProperty("line.separator");
 	private JTextField txtItemCode;
 	private JTextField txtStoreNr;
+	private JTextField txtCustName;
 
 	/**
 	 * Launch the application.
@@ -243,7 +245,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		txtStoreNr.setForeground(new Color(0, 128, 0));
 		txtStoreNr.setFont(new Font("Tahoma", Font.BOLD, 70));
 		txtStoreNr.setHorizontalAlignment(SwingConstants.CENTER);
-		txtStoreNr.setBounds(90, 131, 159, 91);
+		txtStoreNr.setBounds(90, 131, 482, 91);
 		panelMain.add(txtStoreNr);
 		txtStoreNr.setColumns(10);
 		
@@ -251,6 +253,21 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		lblStoreNumber.setForeground(new Color(102, 0, 0));
 		lblStoreNumber.setBounds(10, 170, 72, 14);
 		panelMain.add(lblStoreNumber);
+		
+		JLabel lblCustomer = new JLabel("Customer");
+		lblCustomer.setForeground(new Color(102, 0, 0));
+		lblCustomer.setBounds(10, 272, 72, 14);
+		panelMain.add(lblCustomer);
+		
+		txtCustName = new JTextField();
+		txtCustName.setToolTipText("Customer name");
+		txtCustName.setHorizontalAlignment(SwingConstants.CENTER);
+		txtCustName.setForeground(Color.ORANGE);
+		txtCustName.setFont(new Font("Tahoma", Font.BOLD, 40));
+		txtCustName.setEditable(false);
+		txtCustName.setColumns(10);
+		txtCustName.setBounds(90, 233, 482, 91);
+		panelMain.add(txtCustName);
 	}
 	
 	public void ItemCodePerformed()
@@ -260,7 +277,8 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 			return;
 		
 		String code = txtItemCode.getText().trim();
-		code = code.substring(1, code.length()-1);
+		if (code.length() > 1)
+			code = code.substring(1, code.length()-1);
 		
 		for (int i = 0; i < data.size(); i++) {
 			for (int j = 0; j < data.get(i).items.size(); j++) {
@@ -404,6 +422,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 					order = new OrderEntity();
 					order.Id = items[1];
 					order.StoreNr = items[0];
+					order.CustName = items[3];
 					order.SetState(BaseState.NonEquipped);
 					
 					orderItems = new ArrayList<OrderItemEntity>();
@@ -448,7 +467,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 	}
 	
 	private String readFileAsString(File file) throws IOException {
-        StringBuffer fileData = new StringBuffer();
+        /*StringBuffer fileData = new StringBuffer();
         BufferedReader reader = new BufferedReader(
                 new FileReader(file));
         char[] buf = new char[1024];
@@ -458,7 +477,19 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
             fileData.append(readData);
         }
         reader.close();
-        return fileData.toString();
+        return fileData.toString();*/
+        
+        BufferedReader in = new BufferedReader(
+     		   new InputStreamReader(new FileInputStream(file.getPath()), "UTF8"));
+        StringBuilder sb = new StringBuilder();
+        String str;
+        while ((str = in.readLine()) != null) {
+		    sb.append(str);
+		    sb.append("\n");
+		}
+        in.close();
+        
+        return sb.toString();
     }
 
 	@Override
@@ -471,6 +502,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		@SuppressWarnings("unchecked")
 		ArrayList<OrderEntity> data = (ArrayList<OrderEntity>)model.data;
 		
+		txtCustName.setText(data.get(index).CustName);
 		ArrayList<OrderItemEntity> items = data.get(index).items;
 		ShowOrderItems(items);
 	}
