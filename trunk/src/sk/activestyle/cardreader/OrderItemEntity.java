@@ -5,6 +5,8 @@ import javax.swing.ImageIcon;
 public class OrderItemEntity extends BaseEntity {
 
 	public String ItemName;
+	public String ProdName;
+	public String Size;
 	public OrderEntity parent;
 	
 	@Override

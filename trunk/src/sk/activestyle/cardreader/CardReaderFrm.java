@@ -56,6 +56,8 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 	private JTextField txtItemCode;
 	private JTextField txtStoreNr;
 	private JTextField txtCustName;
+	private JTextField txtProdName;
+	private JTextField txtSize;
 
 	/**
 	 * Launch the application.
@@ -100,7 +102,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 			}
 		});
 		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader");
-		frmActivestyleCardreader.setBounds(100, 100, 824, 466);
+		frmActivestyleCardreader.setBounds(100, 100, 962, 525);
 		frmActivestyleCardreader.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmActivestyleCardreader.getContentPane().setLayout(new GridLayout(1, 1, 0, 0));
 		frmActivestyleCardreader.setIconImage(ImageHelper.GetImage(ImageHelper.ImgAppIco).getImage());
@@ -148,7 +150,23 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		tableItems.getColumnModel().getColumn(2).setPreferredWidth(40);
 		tableItems.getColumnModel().getColumn(2).setMinWidth(40);
 		tableItems.getColumnModel().getColumn(2).setMaxWidth(40);
-		tableOrders.getColumnModel().getColumn(2).setCellRenderer(new IconCellRenderer());
+		tableItems.getColumnModel().getColumn(2).setCellRenderer(new IconCellRenderer());
+		tableItems.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+			
+			@Override
+			public void valueChanged(ListSelectionEvent arg0) {
+				int index = tableItems.getSelectedRow();
+				if (index == -1)
+					return;
+				
+				StringIconTableModel<OrderItemEntity> model = GetOrderItemsTableModel();
+				@SuppressWarnings("unchecked")
+				ArrayList<OrderItemEntity> data = (ArrayList<OrderItemEntity>)model.data;
+				txtProdName.setText(data.get(index).ProdName);
+				txtSize.setText(data.get(index).Size);
+				
+			}
+		});
 		scrollPane_1.setViewportView(tableItems);
 		
 		JPanel panelMain = new JPanel();
@@ -245,7 +263,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		txtStoreNr.setForeground(new Color(0, 128, 0));
 		txtStoreNr.setFont(new Font("Tahoma", Font.BOLD, 70));
 		txtStoreNr.setHorizontalAlignment(SwingConstants.CENTER);
-		txtStoreNr.setBounds(90, 131, 482, 91);
+		txtStoreNr.setBounds(90, 131, 599, 91);
 		panelMain.add(txtStoreNr);
 		txtStoreNr.setColumns(10);
 		
@@ -256,7 +274,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		
 		JLabel lblCustomer = new JLabel("Customer");
 		lblCustomer.setForeground(new Color(102, 0, 0));
-		lblCustomer.setBounds(10, 272, 72, 14);
+		lblCustomer.setBounds(10, 258, 72, 14);
 		panelMain.add(lblCustomer);
 		
 		txtCustName = new JTextField();
@@ -266,8 +284,38 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		txtCustName.setFont(new Font("Tahoma", Font.BOLD, 40));
 		txtCustName.setEditable(false);
 		txtCustName.setColumns(10);
-		txtCustName.setBounds(90, 233, 482, 91);
+		txtCustName.setBounds(90, 233, 599, 66);
 		panelMain.add(txtCustName);
+		
+		JLabel lblProdName = new JLabel("Prod. name");
+		lblProdName.setForeground(new Color(102, 0, 0));
+		lblProdName.setBounds(10, 335, 72, 14);
+		panelMain.add(lblProdName);
+		
+		txtProdName = new JTextField();
+		txtProdName.setToolTipText("Customer name");
+		txtProdName.setHorizontalAlignment(SwingConstants.CENTER);
+		txtProdName.setForeground(Color.ORANGE);
+		txtProdName.setFont(new Font("Tahoma", Font.BOLD, 25));
+		txtProdName.setEditable(false);
+		txtProdName.setColumns(10);
+		txtProdName.setBounds(90, 310, 599, 66);
+		panelMain.add(txtProdName);
+		
+		JLabel lblSize = new JLabel("Size");
+		lblSize.setForeground(new Color(102, 0, 0));
+		lblSize.setBounds(10, 412, 72, 14);
+		panelMain.add(lblSize);
+		
+		txtSize = new JTextField();
+		txtSize.setToolTipText("Customer name");
+		txtSize.setHorizontalAlignment(SwingConstants.CENTER);
+		txtSize.setForeground(Color.ORANGE);
+		txtSize.setFont(new Font("Tahoma", Font.BOLD, 40));
+		txtSize.setEditable(false);
+		txtSize.setColumns(10);
+		txtSize.setBounds(90, 387, 599, 66);
+		panelMain.add(txtSize);
 	}
 	
 	public void ItemCodePerformed()
@@ -432,6 +480,10 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				
 				OrderItemEntity newItem = new OrderItemEntity();
 				newItem.Id = items[2];
+				if (items.length > 4)
+					newItem.ProdName = items[4];
+				if (items.length > 5)
+					newItem.Size = items[5];
 				newItem.ItemName = "";
 				newItem.parent = order;
 				newItem.SetState(BaseState.NonEquipped);
@@ -494,16 +546,20 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		int index = tableOrders.getSelectedRow();
-		if (index == -1)
-			return;
-		
-		StringIconTableModel<OrderEntity> model = GetOrdersTableModel();
-		@SuppressWarnings("unchecked")
-		ArrayList<OrderEntity> data = (ArrayList<OrderEntity>)model.data;
-		
-		txtCustName.setText(data.get(index).CustName);
-		ArrayList<OrderItemEntity> items = data.get(index).items;
-		ShowOrderItems(items);
+		{
+			int index = tableOrders.getSelectedRow();
+			if (index == -1)
+				return;
+			
+			StringIconTableModel<OrderEntity> model = GetOrdersTableModel();
+			@SuppressWarnings("unchecked")
+			ArrayList<OrderEntity> data = (ArrayList<OrderEntity>)model.data;
+			
+			txtCustName.setText(data.get(index).CustName);
+			txtProdName.setText("");
+			txtSize.setText("");
+			ArrayList<OrderItemEntity> items = data.get(index).items;
+			ShowOrderItems(items);
+		}
 	}
 }
