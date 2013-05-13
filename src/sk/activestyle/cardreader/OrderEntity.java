@@ -7,6 +7,7 @@ import javax.swing.ImageIcon;
 public class OrderEntity extends BaseEntity {
 
 	public ArrayList<OrderItemEntity> items = new ArrayList<OrderItemEntity>();
+	public String Note;
 	
 	@Override
 	public ImageIcon GetImage() {

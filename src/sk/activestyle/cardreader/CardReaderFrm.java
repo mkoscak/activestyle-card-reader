@@ -58,6 +58,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 	private JTextField txtCustName;
 	private JTextField txtProdName;
 	private JTextField txtSize;
+	private JTextField txtNote;
 
 	/**
 	 * Launch the application.
@@ -101,8 +102,8 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				});
 			}
 		});
-		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader");
-		frmActivestyleCardreader.setBounds(100, 100, 962, 525);
+		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader - v0.6");
+		frmActivestyleCardreader.setBounds(100, 100, 962, 597);
 		frmActivestyleCardreader.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmActivestyleCardreader.getContentPane().setLayout(new GridLayout(1, 1, 0, 0));
 		frmActivestyleCardreader.setIconImage(ImageHelper.GetImage(ImageHelper.ImgAppIco).getImage());
@@ -164,7 +165,6 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				ArrayList<OrderItemEntity> data = (ArrayList<OrderItemEntity>)model.data;
 				txtProdName.setText(data.get(index).ProdName);
 				txtSize.setText(data.get(index).Size);
-				
 			}
 		});
 		scrollPane_1.setViewportView(tableItems);
@@ -316,6 +316,21 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		txtSize.setColumns(10);
 		txtSize.setBounds(90, 387, 599, 66);
 		panelMain.add(txtSize);
+		
+		JLabel lblNote = new JLabel("Note");
+		lblNote.setForeground(new Color(102, 0, 0));
+		lblNote.setBounds(10, 489, 72, 14);
+		panelMain.add(lblNote);
+		
+		txtNote = new JTextField();
+		txtNote.setToolTipText("Note");
+		txtNote.setHorizontalAlignment(SwingConstants.CENTER);
+		txtNote.setForeground(Color.GREEN);
+		txtNote.setFont(new Font("Tahoma", Font.BOLD, 33));
+		txtNote.setEditable(false);
+		txtNote.setColumns(10);
+		txtNote.setBounds(90, 464, 599, 66);
+		panelMain.add(txtNote);
 	}
 	
 	public void ItemCodePerformed()
@@ -471,6 +486,8 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 					order.Id = items[1];
 					order.StoreNr = items[0];
 					order.CustName = items[3];
+					if (items.length > 6)
+						order.Note = items[6];
 					order.SetState(BaseState.NonEquipped);
 					
 					orderItems = new ArrayList<OrderItemEntity>();
@@ -555,7 +572,10 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 			@SuppressWarnings("unchecked")
 			ArrayList<OrderEntity> data = (ArrayList<OrderEntity>)model.data;
 			
-			txtCustName.setText(data.get(index).CustName);
+			OrderEntity ent = data.get(index);
+			
+			txtCustName.setText(ent.CustName);
+			txtNote.setText(ent.Note);
 			txtProdName.setText("");
 			txtSize.setText("");
 			ArrayList<OrderItemEntity> items = data.get(index).items;
