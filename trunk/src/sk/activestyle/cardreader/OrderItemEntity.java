@@ -8,6 +8,7 @@ public class OrderItemEntity extends BaseEntity {
 	public String ProdName;
 	public String Size;
 	public OrderEntity parent;
+	public boolean Processed = false;
 	
 	@Override
 	public ImageIcon GetImage() {
