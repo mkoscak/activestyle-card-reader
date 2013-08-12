@@ -102,7 +102,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				});
 			}
 		});
-		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader - v0.6");
+		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader - v0.7");
 		frmActivestyleCardreader.setBounds(100, 100, 962, 597);
 		frmActivestyleCardreader.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmActivestyleCardreader.getContentPane().setLayout(new GridLayout(1, 1, 0, 0));
@@ -259,6 +259,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		panelMain.add(checkAutoEquip);
 		
 		txtStoreNr = new JTextField();
+		txtStoreNr.setToolTipText("Store number");
 		txtStoreNr.setEditable(false);
 		txtStoreNr.setForeground(new Color(0, 128, 0));
 		txtStoreNr.setFont(new Font("Tahoma", Font.BOLD, 70));
@@ -293,7 +294,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		panelMain.add(lblProdName);
 		
 		txtProdName = new JTextField();
-		txtProdName.setToolTipText("Customer name");
+		txtProdName.setToolTipText("Product name");
 		txtProdName.setHorizontalAlignment(SwingConstants.CENTER);
 		txtProdName.setForeground(Color.ORANGE);
 		txtProdName.setFont(new Font("Tahoma", Font.BOLD, 25));
@@ -308,7 +309,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		panelMain.add(lblSize);
 		
 		txtSize = new JTextField();
-		txtSize.setToolTipText("Customer name");
+		txtSize.setToolTipText("Size");
 		txtSize.setHorizontalAlignment(SwingConstants.CENTER);
 		txtSize.setForeground(Color.ORANGE);
 		txtSize.setFont(new Font("Tahoma", Font.BOLD, 40));
@@ -345,9 +346,14 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		
 		for (int i = 0; i < data.size(); i++) {
 			for (int j = 0; j < data.get(i).items.size(); j++) {
+				
+				OrderItemEntity ent = data.get(i).items.get(j);
 				String actual = data.get(i).items.get(j).Id.trim();
-				if (code.equals(actual))
+				
+				if (code.equals(actual) && !ent.Processed)
 				{
+					ent.Processed = true;
+					
 					tableOrders.setRowSelectionInterval(i, i);
 					Rectangle r = tableOrders.getCellRect(i, 0, true);
 					tableOrders.scrollRectToVisible(r);
