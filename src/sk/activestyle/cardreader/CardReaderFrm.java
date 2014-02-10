@@ -9,6 +9,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -102,7 +105,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				});
 			}
 		});
-		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader - v0.7");
+		frmActivestyleCardreader.setTitle("ActiveStyle (c) CardReader - v0.8");
 		frmActivestyleCardreader.setBounds(100, 100, 962, 597);
 		frmActivestyleCardreader.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmActivestyleCardreader.getContentPane().setLayout(new GridLayout(1, 1, 0, 0));
@@ -140,7 +143,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		splitOrdersItems.setRightComponent(scrollPane_1);
 		
 		tableItems = new JTable();
-		tableItems.setToolTipText("Order items");
+		tableItems.setToolTipText("Double-click to [d]equip");
 		tableItems.setShowGrid(false);
 		tableItems.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableItems.setFillsViewportHeight(true);
@@ -163,8 +166,26 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 				StringIconTableModel<OrderItemEntity> model = GetOrderItemsTableModel();
 				@SuppressWarnings("unchecked")
 				ArrayList<OrderItemEntity> data = (ArrayList<OrderItemEntity>)model.data;
-				txtProdName.setText(data.get(index).ProdName);
-				txtSize.setText(data.get(index).Size);
+				OrderItemEntity oi = data.get(index);
+				txtProdName.setText(oi.ProdName);
+				txtSize.setText(oi.Size);
+				txtStoreNr.setText(oi.parent.StoreNr);
+			}
+		});
+		tableItems.addMouseListener(new MouseAdapter() {
+			
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2)
+				{
+					JTable target = (JTable)e.getSource();
+			        int row = target.getSelectedRow();
+			        StringIconTableModel<OrderItemEntity> model = GetOrderItemsTableModel();
+			        OrderItemEntity oi = (OrderItemEntity)model.data.get(row);
+			        if (oi.getState() == BaseState.Equipped)
+			        	EquipItem(oi.parent, oi, BaseState.NonEquipped);
+			        else
+			        	txtItemCode.setText("0" + oi.Id + "0");
+				}
 			}
 		});
 		scrollPane_1.setViewportView(tableItems);
@@ -346,14 +367,9 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		
 		for (int i = 0; i < data.size(); i++) {
 			for (int j = 0; j < data.get(i).items.size(); j++) {
-				
-				OrderItemEntity ent = data.get(i).items.get(j);
 				String actual = data.get(i).items.get(j).Id.trim();
-				
-				if (code.equals(actual) && !ent.Processed)
+				if (code.equals(actual))
 				{
-					ent.Processed = true;
-					
 					tableOrders.setRowSelectionInterval(i, i);
 					Rectangle r = tableOrders.getCellRect(i, 0, true);
 					tableOrders.scrollRectToVisible(r);
@@ -361,25 +377,7 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 					r = tableItems.getCellRect(j, 0, true);
 					tableItems.scrollRectToVisible(r);
 					
-					data.get(i).items.get(j).SetState(BaseState.Equipped);
-					
-					txtStoreNr.setText(data.get(i).StoreNr);
-					
-					tableOrders.updateUI();
-					tableItems.updateUI();
-					
-					if (data.get(i).getState() == BaseState.Equipped)
-						panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateEquipped));
-					else
-						panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateNonEquipped));
-					panelState.repaint();
-					
-					SwingUtilities.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							txtItemCode.selectAll();
-						}
-					});
+					EquipItem(data.get(i), data.get(i).items.get(j), BaseState.Equipped);
 									
 					return;
 				}
@@ -390,6 +388,31 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 		
 		panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateUnknown));
 		panelState.repaint();
+	}
+	
+	public void EquipItem(OrderEntity order, OrderItemEntity item, BaseState state)
+	{
+		item.SetState(state);
+		if (state == BaseState.NonEquipped)
+			order.SetState(BaseState.NonEquipped);
+		
+		txtStoreNr.setText(order.StoreNr);
+		
+		tableOrders.updateUI();
+		tableItems.updateUI();
+		
+		if (order.getState() == BaseState.Equipped)
+			panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateEquipped));
+		else
+			panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateNonEquipped));
+		panelState.repaint();
+		
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				txtItemCode.selectAll();
+			}
+		});
 	}
 
 	@Override
@@ -580,10 +603,16 @@ public class CardReaderFrm implements ActionListener, ListSelectionListener {
 			
 			OrderEntity ent = data.get(index);
 			
+			txtStoreNr.setText(ent.StoreNr);
 			txtCustName.setText(ent.CustName);
 			txtNote.setText(ent.Note);
 			txtProdName.setText("");
 			txtSize.setText("");
+			if (ent.getState() == BaseState.Equipped)
+				panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateEquipped));
+			else
+				panelState.SetImage(ImageHelper.GetImage(ImageHelper.ImgStateNonEquipped));
+			panelState.repaint();
 			ArrayList<OrderItemEntity> items = data.get(index).items;
 			ShowOrderItems(items);
 		}
